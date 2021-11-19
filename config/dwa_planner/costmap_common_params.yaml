@@ -3,7 +3,7 @@ publish_voxel_map: false
 meter_scoring: true
 
 robot_radius: 0.19
-
+robot_base_frame: $(arg prefix)base_footprint
 
 obstacle_layer:
  enabled: true

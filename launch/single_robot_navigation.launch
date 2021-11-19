@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="__ns" default=""/>
+  <arg name="x_pos" default="0"/>
+  <arg name="y_pos" default="0"/>
+   <arg name="amcl_x_pos" default="0"/>
+  <arg name="amcl_y_pos" default="0"/>
+  <arg name="model_name" default="robotont"/>
+
+  <arg name="use_sim_time" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+  <env name="GAZEBO_MODEL_PATH" value="$(find covsvg24_models)/models:$GAZEBO_MODEL_PATH" />
+  <arg name="model" default="robotont_gazebo_lidar"/>
+
+  <arg name="world" default="$(find jackal_setup)/worlds/delta_3rd_floor.world" />
+
+ 
+  <group ns="$(arg __ns)">
+    
+    <node if="$(eval model == 'robotont_gazebo_nuc')" name="relay" type="relay" pkg="topic_tools" args="camera/depth/image_rect_raw camera/aligned_depth_to_color/image_raw" />
+
+    <include file="$(find robotont_gazebo)/launch/upload_description.launch">
+      <arg name="__ns" value="$(arg __ns)"/>
+      <arg name="model" default="$(arg model)"/>
+    </include>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x $(arg x_pos) -y $(arg y_pos) -model $(arg model_name)"  output="screen"/>
+
+    <include file="$(find robotont_navigation)/launch/amcl.launch">
+      <arg name="__ns" value="$(arg __ns)"/>
+      <arg name="odom_frame_id"   value="$(arg __ns)/odom"/>
+      <arg name="base_frame_id"   value="$(arg __ns)/base_footprint"/>
+      <arg name="initial_pose_x"   value="$(arg amcl_x_pos)"/>
+      <arg name="initial_pose_y"   value="$(arg amcl_y_pos)"/>
+    </include>
+
+    <include file="$(find robotont_navigation)/launch/move_base.launch">
+      <arg name="__ns" value="$(arg __ns)"/>
+    </include>
+
+  </group>
+
+</launch>

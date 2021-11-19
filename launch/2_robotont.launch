@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="use_sim_time" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+  <env name="GAZEBO_MODEL_PATH" value="$(find covsvg24_models)/models:$GAZEBO_MODEL_PATH" />
+  <arg name="model" default="robotont_gazebo_nuc"/>
+  <arg name="world" default="$(find jackal_setup)/worlds/delta_3rd_floor.world" />
+
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world)"/>
+  </include>
+
+  <arg name="map_file" default="$(find jackal_setup)/maps/delta_3rd_floor/map.yaml"/>
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <include file="$(find robotont_navigation)/launch/single_robot_navigation.launch">
+    <arg name="model_name" value="robot_1"/>
+    <arg name="__ns" value="robot_1"/>
+    <arg name="x_pos" value="96"/>
+    <arg name="y_pos" value="-20"/>
+    <arg name="amcl_x_pos" value="71.8"/>
+    <arg name="amcl_y_pos" value="3.4"/>
+  </include>
+
+   
+  <include file="$(find robotont_navigation)/launch/single_robot_navigation.launch">
+    <arg name="model_name" value="robot_2"/>
+    <arg name="__ns" value="robot_2"/>
+    <arg name="x_pos" value="96"/>
+    <arg name="y_pos" value="-25"/>
+    <arg name="amcl_x_pos" value="71.8"/>
+    <arg name="amcl_y_pos" value="-1.6"/>
+  </include>
+
+
+</launch>

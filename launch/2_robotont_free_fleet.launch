@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+  <arg name="model" default="robotont_gazebo_lidar"/>
+  <arg name="map_file" default="$(find covsg24_fleet_client)/maps/hospital_l2/hospital_l2.yaml"/>
+  <arg name="world_file" default="$(env HOME)/.gazebo/worlds/hospital_2nd_floor.world"/>
+  <arg name="use_sim_time" default="true"/>
+
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_file)"/>
+  </include>
+
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+
+  <include file="$(find robotont_navigation)/launch/single_robot_navigation.launch">
+    <arg name="model_name" value="robot_1"/>
+    <arg name="__ns" value="robot_1"/>
+    <arg name="x_pos" value="96"/>
+    <arg name="y_pos" value="-20"/>
+    <arg name="amcl_x_pos" value="71.8"/>
+    <arg name="amcl_y_pos" value="3.4"/>
+  </include>
+
+   
+  <include file="$(find robotont_navigation)/launch/single_robot_navigation.launch">
+    <arg name="model_name" value="robot_2"/>
+    <arg name="__ns" value="robot_2"/>
+    <arg name="x_pos" value="96"/>
+    <arg name="y_pos" value="-25"/>
+    <arg name="amcl_x_pos" value="71.8"/>
+    <arg name="amcl_y_pos" value="-1.6"/>
+  </include>
+  <group ns="robot_1">
+    <node name="robot_1_free_fleet_client_node" pkg="free_fleet_client_ros1"
+        type="free_fleet_client_ros1" output="screen">
+      <param name="fleet_name" type="string" value="robotont_fleet"/>
+      <param name="robot_name" type="string" value="robot_1"/>
+      <param name="robot_frame" type="string" value="robot_1/base_link"/>
+      <param name="level_name" type="string" value="L2"/>
+      <param name="dds_domain" type="int" value="42"/>
+      <param name="max_dist_to_first_waypoint" type="double" value="10.0"/>
+    </node>
+    <node name="robot_battery_state_pub" pkg="rostopic" type="rostopic" args="pub battery_state sensor_msgs/BatteryState
+      --file $(find covsg24_fleet_client)/launch/include/jackal_battery_state_msg.yaml -r 3" output="screen"/> 
+  </group>
+
+  <group ns="robot_2">
+    <node name="robot_2_free_fleet_client_node" pkg="free_fleet_client_ros1"
+      type="free_fleet_client_ros1" output="screen">
+      <param name="fleet_name" type="string" value="robotont_fleet"/>
+      <param name="robot_name" type="string" value="robot_2"/>
+      <param name="robot_frame" type="string" value="robot_2/base_link"/>
+      <param name="level_name" type="string" value="L2"/>
+      <param name="dds_domain" type="int" value="42"/>
+      <param name="max_dist_to_first_waypoint" type="double" value="10.0"/>
+    </node>
+    <node name="robot_battery_state_pub" pkg="rostopic" type="rostopic" args="pub battery_state sensor_msgs/BatteryState
+      --file $(find covsg24_fleet_client)/launch/include/jackal_battery_state_msg.yaml -r 3" output="screen"/>
+  </group>
+</launch>
